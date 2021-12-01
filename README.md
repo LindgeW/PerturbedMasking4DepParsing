@@ -3,11 +3,12 @@ To induce dependency structures from pre-trained model (an unsupervised dependen
 
 ### To parse
 
-Input: welcome to Tianjin university.
+#### Input: 
 
-Output:
+welcome to Tianjin university.
 
-![dependency_tree](deptree.png)
+#### Output:
+<img src="deptree.png" width="50%" height="50%" alt="dependency tree" align=center/>
 
 ### Related Work
 [Perturbed Masking: Parameter-free Probing for Analyzing and
