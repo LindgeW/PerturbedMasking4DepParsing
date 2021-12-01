@@ -4,8 +4,7 @@ To induce dependency structures from pre-trained model (an unsupervised dependen
 ### To parse
 
 #### Input: 
-
-welcome to Tianjin university.
+  welcome to Tianjin university.
 
 #### Output:
 <img src="deptree.png" width="50%" height="50%" alt="dependency tree" align=center/>
