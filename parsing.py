@@ -128,14 +128,14 @@ def get_dep_matrix(args, model, tokenizer, dataset):
                     if mapping[tmp_id] != -1:
                         one_batch[j][tmp_id] = mask_id
 
-            # 2. Convert one batch to PyTorch tensors
+            # 2. Convert one batch to tensors
             tokens_tensor = torch.tensor(one_batch)
             segments_tensor = torch.tensor([[0 for _ in one_sent] for one_sent in one_batch])
-            if args.cuda:
-                tokens_tensor = tokens_tensor.to('cuda')
-                segments_tensor = segments_tensor.to('cuda')
-                model.to('cuda')
-
+            if args.cuda >= 0:
+                tokens_tensor = tokens_tensor.to('cuda:'+str(args.cuda))
+                segments_tensor = segments_tensor.to('cuda:'+str(args.cuda))
+                model.to('cuda:'+str(args.cuda))
+         
             # 3. get all hidden states for one batch
             with torch.no_grad():
                 model_outputs = model(tokens_tensor, segments_tensor)
@@ -144,8 +144,8 @@ def get_dep_matrix(args, model, tokenizer, dataset):
 
             # 4. get hidden states for word_i in one batch
             for k, layer in enumerate(all_layers):
-                if args.cuda:
-                    hidden_states_for_token_i = layer[:, i, :].cpu().numpy()
+                if args.cuda >= 0:
+                    hidden_states_for_token_i = layer[:, i, :].detach().cpu().numpy()
                 else:
                     hidden_states_for_token_i = layer[:, i, :].numpy()
                 all_layers_matrix_as_list[k].append(hidden_states_for_token_i)
@@ -226,6 +226,13 @@ def decoding(args, results):
     return trees
 
 
+def get_dep_trees(args, bert_model, tokenizer, dataset):
+    # dataset: token列表 [[t11, t12, t13, ...], [t21, t22, t23, ...], ...]
+    results = get_dep_matrix(args, bert_model, tokenizer, dataset)
+    trees = decoding(args, results[-2])  # 用倒数第2层输出
+    return trees
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--cuda', type=int, default=-1, help='gpu id')
@@ -242,8 +249,7 @@ def main():
     dataset = ['I come from China'.split(),
                'Welcome to China'.split(),
                'He will go to Beijing tomorrow'.split()]
-    results = get_dep_matrix(args, model, tokenizer, dataset)
-    trees = decoding(args, results[-2])
+    trees = get_dep_trees(args, model, tokenizer, dataset)
     print(trees)
 
 main()
